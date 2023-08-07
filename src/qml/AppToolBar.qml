@@ -2,7 +2,7 @@ import QtQuick 2.0
 import QtQuick.Layouts 1.1
 import QtQuick.Controls 2.15
 import QtQuick.Controls.Styles 1.1
-import QtQuick.Dialogs 1.2
+import Qt.labs.platform 1.1
 import QtQml.Models 2.2
 import "."
 import "./common"
@@ -49,27 +49,27 @@ ToolBar {
                     id: importConnectionsDialog
                     title: qsTranslate("RESP","Import Connections")
                     nameFilters: ["Connections (*.json)"]
-                    selectExisting: true
-                    onAccepted: connectionsManager.importConnections(qmlUtils.getPathFromUrl(fileUrl))
+                    fileMode: FileDialog.OpenFile
+                    onAccepted: connectionsManager.importConnections(qmlUtils.getPathFromUrl(file))
                 }
 
                 FileDialog {
                     id: exportConnectionsDialog
                     title: qsTranslate("RESP","Export Connections")
                     nameFilters: ["Connections (*.json)"]
-                    selectExisting: false
-                    onAccepted: connectionsManager.saveConnectionsConfigToFile(qmlUtils.getPathFromUrl(fileUrl))
+                    fileMode: FileDialog.SaveFile
+                    onAccepted: connectionsManager.saveConnectionsConfigToFile(qmlUtils.getPathFromUrl(file))
                 }
 
-                Menu {
+                BetterMenu {
                     id: menu
 
-                    MenuItem {
+                    BetterMenuItem {
                         objectName: "rdm_import_connections_btn"
                         text: qsTranslate("RESP","Import Connections")
                         onTriggered: importConnectionsDialog.open()
                     }
-                    MenuItem {
+                    BetterMenuItem {
                         objectName: "rdm_export_connections_btn"
                         text: qsTranslate("RESP","Export Connections")
                         onTriggered: exportConnectionsDialog.open()
@@ -136,6 +136,16 @@ ToolBar {
             text: qsTranslate("RESP","Log")
 
             onClicked: logDrawer.open()
+        }
+
+        BetterButton {
+            objectName: "rdm_extension_server_settings_btn"
+            iconSource: PlatformUtils.getThemeIcon("server_2.svg")
+            text: qsTranslate("RESP","Extension Server")
+
+            onClicked: {
+                extServerSettingsDialog.item.open()
+            }
         }
 
         BetterButton {

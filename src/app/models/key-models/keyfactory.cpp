@@ -6,6 +6,7 @@
 #include <QFile>
 #include <QObject>
 
+#include "bfkey.h"
 #include "hashkey.h"
 #include "listkey.h"
 #include "rejsonkey.h"
@@ -13,6 +14,7 @@
 #include "sortedsetkey.h"
 #include "stream.h"
 #include "stringkey.h"
+#include "unknownkey.h"
 
 KeyFactory::KeyFactory() {}
 
@@ -62,11 +64,6 @@ void KeyFactory::loadKey(
       }
 
       auto result = createModel(type, connection, keyFullPath, dbIndex, ttl);
-
-      if (!result)
-        return callback(result, QCoreApplication::translate(
-                                    "RESP", "Unsupported Redis Data type %1")
-                                    .arg(type));
 
       callback(result, QString());
     };
@@ -159,7 +156,12 @@ QSharedPointer<ValueEditor::Model> KeyFactory::createModel(
   } else if (type == "stream") {
     return QSharedPointer<ValueEditor::Model>(
         new StreamKeyModel(connection, keyFullPath, dbIndex, ttl));
+  } else if (type.startsWith("MBbloom")) {
+      QString ff = type.endsWith("CF")? "cf" : "bf";
+      return QSharedPointer<ValueEditor::Model>(
+          new BloomFilterKeyModel(connection, keyFullPath, dbIndex, ttl, ff));
   }
 
-  return QSharedPointer<ValueEditor::Model>();
+  return QSharedPointer<ValueEditor::Model>(
+      new UnknownKeyModel(connection, keyFullPath, dbIndex, ttl, type));
 }
